@@ -1,0 +1,26 @@
+{
+  "name": "@growthos/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node --project tsconfig.json src/main.ts",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@growthos/config": "workspace:*",
+    "@growthos/database": "workspace:*",
+    "@growthos/shared": "workspace:*",
+    "bullmq": "^5.15.0",
+    "ioredis": "^5.4.1",
+    "pino": "^9.4.0",
+    "pino-pretty": "^11.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "ts-node": "^10.9.0"
+  }
+}

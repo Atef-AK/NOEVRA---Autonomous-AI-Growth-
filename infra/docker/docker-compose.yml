@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+  # ============================================================
+  # PostgreSQL with pgvector extension
+  # ============================================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: growthos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: growthos
+      POSTGRES_PASSWORD: growthos_dev
+      POSTGRES_DB: growthos_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U growthos -d growthos_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # Redis 7
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: growthos-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # MinIO (S3-compatible object storage for development)
+  # ============================================================
+  minio:
+    image: minio/minio:latest
+    container_name: growthos-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ============================================================
+  # Mailpit (local SMTP / email testing)
+  # ============================================================
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: growthos-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  default:
+    name: growthos-network
