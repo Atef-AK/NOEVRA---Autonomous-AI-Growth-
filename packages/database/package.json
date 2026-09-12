@@ -1,29 +1,31 @@
 {
-  "name": "@growthos/database",
-  "version": "0.1.0",
-  "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "scripts": {
-    "generate": "prisma generate",
-    "migrate:dev": "prisma migrate dev",
-    "migrate:deploy": "prisma migrate deploy",
-    "migrate:reset": "prisma migrate reset",
-    "studio": "prisma studio",
-    "seed": "ts-node --project tsconfig.json prisma/seed.ts",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@prisma/client": "^5.20.0",
-    "zod": "^3.23.0"
-  },
-  "devDependencies": {
-    "prisma": "^5.20.0",
-    "typescript": "^5.6.0",
-    "ts-node": "^10.9.0",
-    "vitest": "^2.0.0",
-    "@growthos/shared": "workspace:*"
-  }
+    "name":  "@growthos/database",
+    "version":  "0.1.0",
+    "private":  true,
+    "main":  "./dist/index.js",
+    "types":  "./dist/index.d.ts",
+    "scripts":  {
+                    "generate":  "prisma generate",
+                    "migrate:dev":  "prisma migrate dev",
+                    "migrate:deploy":  "prisma migrate deploy",
+                    "migrate:reset":  "prisma migrate reset",
+                    "studio":  "prisma studio",
+                    "seed":  "ts-node --project tsconfig.json prisma/seed.ts",
+                    "typecheck":  "tsc --noEmit",
+                    "lint":  "eslint src --ext .ts",
+                    "test":  "vitest run",
+                    "build":  "tsc -p tsconfig.json --outDir dist --noEmit false"
+                },
+    "dependencies":  {
+                         "@prisma/client":  "^5.20.0",
+                         "zod":  "^3.23.0"
+                     },
+    "devDependencies":  {
+                            "prisma":  "^5.20.0",
+                            "typescript":  "^5.6.0",
+                            "ts-node":  "^10.9.0",
+                            "vitest":  "^2.0.0",
+                            "@growthos/shared":  "workspace:*",
+                            "@growthos/agent-sdk":  "workspace:*"
+                        }
 }

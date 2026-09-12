@@ -16,7 +16,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "resolveJsonModule": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": false
   },
   "exclude": [

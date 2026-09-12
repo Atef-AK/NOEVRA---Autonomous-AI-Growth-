@@ -1,4 +1,9 @@
 import 'reflect-metadata';
+// Load .env from monorepo root before any module imports that validate env
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+// dist/ -> apps/api/ -> apps/ -> NOEVRA/ (root)
+dotenv.config({ path: path.resolve(__dirname, '..', '..', '..', '.env') });
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -62,7 +67,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // API versioning
+  // Global API prefix + URI versioning → /api/v1/...
+  app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
   // Swagger / OpenAPI
@@ -75,7 +81,8 @@ async function bootstrap(): Promise<void> {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+    // Note: SwaggerModule.setup bypasses global prefix, so we specify full path
+    SwaggerModule.setup('api/docs', app, document, { useGlobalPrefix: false });
   }
 
   const port = env.API_PORT;

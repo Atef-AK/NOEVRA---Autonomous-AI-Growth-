@@ -120,3 +120,6 @@ export function validateUrlFormat(rawUrl: string): URL {
     throw new SSRFError(`Invalid URL: ${rawUrl}`);
   }
 }
+
+/** Alias for validateSafeUrl */
+export const safeUrl = validateSafeUrl;

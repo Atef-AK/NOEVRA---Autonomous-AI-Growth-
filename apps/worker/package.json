@@ -10,17 +10,25 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
+    "@growthos/agent-runtime": "workspace:*",
+    "@growthos/agent-sdk": "workspace:*",
+    "@growthos/ai": "workspace:*",
     "@growthos/config": "workspace:*",
     "@growthos/database": "workspace:*",
+    "@growthos/events": "workspace:*",
+    "@growthos/policy-engine": "workspace:*",
     "@growthos/shared": "workspace:*",
+    "@growthos/tools": "workspace:*",
     "bullmq": "^5.15.0",
     "ioredis": "^5.4.1",
+    "nodemailer": "^6.9.0",
     "pino": "^9.4.0",
     "pino-pretty": "^11.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "^5.6.0",
-    "ts-node": "^10.9.0"
+    "@types/nodemailer": "^6.4.16",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.6.0"
   }
 }

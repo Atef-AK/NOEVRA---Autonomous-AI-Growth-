@@ -7,7 +7,17 @@ import { getAccessToken, getStoredUser, getStoredOrg, clearSession } from '@/lib
 import { auth } from '@/lib/api';
 
 const NAV_ITEMS = [
+  { href: '/onboarding', label: '🚀 Setup Wizard', icon: '🚀', exact: true },
   { href: '/dashboard', label: 'Dashboard', icon: '▦', exact: true },
+  { href: '/strategy', label: 'Growth Strategy', icon: '🎯' },
+  { href: '/content', label: 'Content Studio', icon: '✍' },
+  { href: '/connectors', label: 'Connectors', icon: '🔌' },
+  { href: '/seo', label: 'Technical SEO', icon: '🔍' },
+  { href: '/leads', label: 'Community & Leads', icon: '👥' },
+  { href: '/analytics', label: 'Analytics & Experiments', icon: '📊' },
+  { href: '/autonomous', label: 'Autonomous Ops', icon: '🤖' },
+  { href: '/brain', label: 'Company Brain', icon: '🧠' },
+  { href: '/agents', label: 'AI Agents', icon: '⚡' },
   { href: '/projects', label: 'Projects', icon: '⬡' },
   { href: '/members', label: 'Members', icon: '◎' },
   { href: '/settings', label: 'Settings', icon: '⚙' },

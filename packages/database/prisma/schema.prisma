@@ -29,6 +29,7 @@ model User {
   refreshTokens       RefreshToken[]
   auditLogs           AuditLog[]
   sentInvitations     OrganizationMember[] @relation("InvitedByUser")
+  agentRuns           AgentRun[]
 
   @@map("users")
 }
@@ -47,25 +48,49 @@ model Organization {
   updatedAt DateTime @updatedAt
 
   // Relations
-  members  OrganizationMember[]
-  projects Project[]
-  auditLogs AuditLog[]
+  members            OrganizationMember[]
+  projects           Project[]
+  auditLogs          AuditLog[]
+  agents             Agent[]
+  agentRuns          AgentRun[]
+  usageEvents        UsageEvent[]
+  companyBrains      CompanyBrain[]
+  knowledgeSources   KnowledgeSource[]
+  knowledgeDocuments KnowledgeDocument[]
+  knowledgeChunks    KnowledgeChunk[]
+  memories           Memory[]
+  growthGoals        GrowthGoal[]
+  growthMissions     GrowthMission[]
+  growthTasks        GrowthTask[]
+  growthOpportunities GrowthOpportunity[]
+  campaigns          Campaign[]
+  contentItems       ContentItem[]
+  connectorAccounts  ConnectorAccount[]
+  socialPosts        SocialPost[]
+  seoAudits          SeoAudit[]
+  keywordTracks      KeywordTrack[]
+  leads              Lead[]
+  communityInteractions CommunityInteraction[]
+  growthExperiments  GrowthExperiment[]
+  attributionTouches AttributionTouch[]
+  departmentCycles   DepartmentCycle[]
+  autonomousSchedules AutonomousSchedule[]
 
   @@map("organizations")
 }
 
 model OrganizationMember {
-  id             String    @id @default(cuid())
-  organizationId String
-  userId         String
-  role           String    @default("member")
+  id              String    @id @default(cuid())
+  organizationId  String
+  userId          String
+  role            String    @default("member")
   invitedByUserId String?
-  inviteEmail    String?   // email used for invitation (may differ from user.email)
-  inviteToken    String?   @unique
-  inviteStatus   String    @default("pending")
-  invitedAt      DateTime  @default(now())
-  joinedAt       DateTime?
-  updatedAt      DateTime  @updatedAt
+  inviteEmail     String?
+  inviteToken     String?   @unique
+  inviteStatus    String    @default("pending")
+  invitedAt       DateTime  @default(now())
+  joinedAt        DateTime?
+  updatedAt       DateTime  @updatedAt
 
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -97,7 +122,28 @@ model Project {
   updatedAt      DateTime @updatedAt
 
   // Relations
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  agents           Agent[]
+  agentRuns        AgentRun[]
+  companyBrains    CompanyBrain[]
+  knowledgeSources KnowledgeSource[]
+  memories         Memory[]
+  growthGoals      GrowthGoal[]
+  growthMissions   GrowthMission[]
+  growthTasks      GrowthTask[]
+  growthOpportunities GrowthOpportunity[]
+  campaigns        Campaign[]
+  contentItems     ContentItem[]
+  connectorAccounts ConnectorAccount[]
+  socialPosts      SocialPost[]
+  seoAudits        SeoAudit[]
+  keywordTracks    KeywordTrack[]
+  leads            Lead[]
+  communityInteractions CommunityInteraction[]
+  growthExperiments GrowthExperiment[]
+  attributionTouches AttributionTouch[]
+  departmentCycles   DepartmentCycle[]
+  autonomousSchedules AutonomousSchedule[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -112,8 +158,8 @@ model Project {
 model RefreshToken {
   id        String    @id @default(cuid())
   userId    String
-  tokenHash String    @unique // bcrypt hash of the actual token
-  family    String    // rotation family for refresh token rotation
+  tokenHash String    @unique
+  family    String
   expiresAt DateTime
   revokedAt DateTime?
   createdAt DateTime  @default(now())
@@ -135,10 +181,10 @@ model AuditLog {
   id             String   @id @default(cuid())
   organizationId String?
   userId         String?
-  action         String   // e.g. "user.login", "connector.added"
-  entityType     String?  // e.g. "project", "connector"
+  action         String
+  entityType     String?
   entityId       String?
-  metadata       Json?    // additional context (never secrets)
+  metadata       Json?
   ipAddress      String?
   userAgent      String?
   createdAt      DateTime @default(now())
@@ -154,33 +200,756 @@ model AuditLog {
 }
 
 // ============================================================
-// EMAIL VERIFICATION TOKENS
+// EMAIL / PASSWORD TOKENS
 // ============================================================
 
 model EmailVerificationToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   email     String
-  tokenHash String   @unique
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([email])
   @@map("email_verification_tokens")
 }
 
-// ============================================================
-// PASSWORD RESET TOKENS
-// ============================================================
-
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   email     String
-  tokenHash String   @unique
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([email])
   @@map("password_reset_tokens")
+}
+
+// ============================================================
+// PHASE 2 — AI RUNTIME
+// ============================================================
+
+// Agent definition (template / persona)
+model Agent {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String?
+  name           String
+  slug           String
+  description    String?
+  // ReAct system prompt template — mustache-style {{vars}}
+  systemPrompt   String   @db.Text
+  // JSON-serialized list of tool names this agent is allowed to use
+  allowedTools   Json     @default("[]")
+  // Which AI provider+model to prefer (e.g. "openai/gpt-4o")
+  preferredModel String   @default("openai/gpt-4o")
+  maxSteps       Int      @default(10)
+  maxTokens      Int      @default(4096)
+  temperatureX10 Int      @default(7) // temperature * 10 to avoid float storage issues
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  runs         AgentRun[]
+  growthTasks  GrowthTask[]
+  contentItems ContentItem[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([projectId])
+  @@map("agents")
+}
+
+// A single execution of an agent
+model AgentRun {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  agentId        String
+  triggeredById  String?   // userId who triggered (null = system/cron)
+  // Input goal/task
+  goal           String    @db.Text
+  // Final answer or error message
+  result         String?   @db.Text
+  status         String    @default("queued") // queued|running|completed|failed|cancelled
+  startedAt      DateTime?
+  completedAt    DateTime?
+  // Total token usage for cost attribution
+  totalInputTokens  Int    @default(0)
+  totalOutputTokens Int    @default(0)
+  totalCostUsd   Decimal?  @db.Decimal(12, 6)
+  errorMessage   String?
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  agent        Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  triggeredBy  User?        @relation(fields: [triggeredById], references: [id])
+  steps        AgentStep[]
+  usageEvents  UsageEvent[]
+  growthTasks  GrowthTask[]
+
+  @@index([organizationId])
+  @@index([agentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("agent_runs")
+}
+
+// Each think/act step in a run (the ReAct loop)
+model AgentStep {
+  id          String   @id @default(cuid())
+  agentRunId  String
+  stepIndex   Int      // 0-based sequential step number
+  // "thought" | "tool_call" | "tool_result" | "final_answer"
+  type        String
+  // For thought/final_answer: the text content
+  content     String?  @db.Text
+  // For tool_call: serialized tool name + args
+  toolName    String?
+  toolArgs    Json?
+  // For tool_result: serialized output
+  toolResult  Json?
+  toolError   String?
+  // Token counts for this step
+  inputTokens  Int     @default(0)
+  outputTokens Int     @default(0)
+  // Provider+model used for this step
+  provider    String?
+  model       String?
+  latencyMs   Int?
+  createdAt   DateTime @default(now())
+
+  agentRun AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  @@index([agentRunId])
+  @@index([agentRunId, stepIndex])
+  @@map("agent_steps")
+}
+
+// Usage ledger for cost tracking and billing attribution
+model UsageEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  agentRunId     String?
+  // "ai_inference" | "tool_call" | "storage_read" | "storage_write"
+  eventType      String
+  provider       String?  // "openai" | "anthropic" | "google"
+  model          String?
+  inputTokens    Int      @default(0)
+  outputTokens   Int      @default(0)
+  costUsd        Decimal? @db.Decimal(12, 6)
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  agentRun     AgentRun?   @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([agentRunId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("usage_events")
+}
+
+// ============================================================
+// PHASE 3: COMPANY BRAIN & KNOWLEDGE MEMORY
+// ============================================================
+
+model CompanyBrain {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  name           String    @default("Primary Brain")
+  summary        String?   @db.Text
+  brandVoice     String?   @db.Text
+  targetAudience String?   @db.Text
+  valueProps     Json      @default("[]")
+  competitors    Json      @default("[]")
+  positioning    String?   @db.Text
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@index([projectId])
+  @@map("company_brains")
+}
+
+model KnowledgeSource {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  type           String    // "url" | "document" | "manual" | "api"
+  sourceUrl      String?
+  title          String
+  status         String    @default("ready") // "pending" | "crawling" | "ready" | "failed"
+  errorMessage   String?
+  metadata       Json?
+  lastCrawledAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  documents    KnowledgeDocument[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@map("knowledge_sources")
+}
+
+model KnowledgeDocument {
+  id             String    @id @default(cuid())
+  sourceId       String
+  organizationId String
+  title          String
+  content        String    @db.Text
+  contentType    String    @default("text/plain") // "text/plain" | "text/markdown" | "text/html"
+  tokenCount     Int       @default(0)
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  source       KnowledgeSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks       KnowledgeChunk[]
+
+  @@index([sourceId])
+  @@index([organizationId])
+  @@map("knowledge_documents")
+}
+
+model KnowledgeChunk {
+  id             String    @id @default(cuid())
+  documentId     String
+  organizationId String
+  chunkIndex     Int
+  content        String    @db.Text
+  tokenCount     Int       @default(0)
+  embedding      Json?
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+
+  document     KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([organizationId])
+  @@index([documentId, chunkIndex])
+  @@map("knowledge_chunks")
+}
+
+model Memory {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  // "fact" | "strategy" | "feedback" | "rule" | "insight"
+  type           String
+  content        String    @db.Text
+  confidence     Float     @default(1.0)
+  importance     Int       @default(5)
+  embedding      Json?
+  lastAccessedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([type])
+  @@map("memories")
+}
+
+// ============================================================
+// PHASE 4: GROWTH STRATEGY & GOAL DECOMPOSITION
+// ============================================================
+
+model GrowthGoal {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  title          String
+  description    String?   @db.Text
+  metricName     String    // e.g. "MRR", "Signups", "Organic Traffic"
+  targetValue    Float
+  currentValue   Float     @default(0)
+  unit           String    @default("count") // "count" | "usd" | "percentage"
+  deadline       DateTime?
+  status         String    @default("active") // "draft" | "active" | "achieved" | "missed"
+  priority       Int       @default(1) // 1 to 5
+  strategyNotes  String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  missions       GrowthMission[]
+  opportunities  GrowthOpportunity[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@map("growth_goals")
+}
+
+model GrowthMission {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  goalId         String?
+  title          String
+  objective      String    @db.Text
+  status         String    @default("planned") // "planned" | "in_progress" | "review" | "completed" | "failed"
+  progress       Int       @default(0) // 0 - 100
+  estimatedImpact String?
+  ownerAgentRole String?   @default("growth_director")
+  deadline       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  goal           GrowthGoal?  @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  tasks          GrowthTask[]
+  contentItems   ContentItem[]
+
+  @@index([organizationId])
+  @@index([goalId])
+  @@index([status])
+  @@map("growth_missions")
+}
+
+model GrowthTask {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  missionId      String
+  agentId        String?
+  agentRunId     String?
+  title          String
+  description    String?   @db.Text
+  status         String    @default("pending") // "pending" | "running" | "completed" | "failed" | "blocked"
+  priority       String    @default("medium") // "low" | "medium" | "high" | "critical"
+  dependencies   Json      @default("[]")
+  output         String?   @db.Text
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  mission        GrowthMission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  agent          Agent?         @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  agentRun       AgentRun?      @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([missionId])
+  @@index([agentId])
+  @@index([agentRunId])
+  @@index([status])
+  @@map("growth_tasks")
+}
+
+model GrowthOpportunity {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  goalId         String?
+  title          String
+  description    String?   @db.Text
+  category       String    @default("content") // "seo" | "content" | "social" | "conversion" | "outreach"
+  reach          Float     @default(5)
+  impact         Float     @default(5)
+  confidence     Float     @default(5)
+  effort         Float     @default(5)
+  riceScore      Float     @default(25)
+  iceScore       Float     @default(125)
+  status         String    @default("discovered") // "discovered" | "approved" | "in_mission" | "discarded"
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  goal           GrowthGoal?  @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([goalId])
+  @@index([riceScore])
+  @@index([status])
+  @@map("growth_opportunities")
+}
+
+// ============================================================
+// PHASE 5: CONTENT ENGINE & EDITORIAL PIPELINE
+// ============================================================
+
+model Campaign {
+  id             String        @id @default(cuid())
+  organizationId String
+  projectId      String?
+  name           String
+  description    String?       @db.Text
+  status         String        @default("active") // "draft" | "active" | "completed" | "archived"
+  startDate      DateTime?
+  endDate        DateTime?
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  contentItems   ContentItem[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("campaigns")
+}
+
+model ContentItem {
+  id             String            @id @default(cuid())
+  organizationId String
+  projectId      String?
+  campaignId     String?
+  missionId      String?
+  authorAgentId  String?
+  title          String
+  slug           String
+  type           String            @default("blog_post") // "blog_post" | "tweet_thread" | "linkedin_post" | "newsletter" | "changelog"
+  status         String            @default("drafting") // "idea" | "brief" | "drafting" | "review" | "scheduled" | "published"
+  content        String            @db.Text
+  tldr           String?           @db.Text
+  outline        Json?
+  targetKeyword  String?
+  seoTitle       String?
+  seoDescription String?
+  readingTimeMin Int               @default(3)
+  brandVoiceScore Int              @default(90) // 0 - 100
+  scheduledFor   DateTime?
+  publishedAt    DateTime?
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?          @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  campaign       Campaign?         @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  mission        GrowthMission?    @relation(fields: [missionId], references: [id], onDelete: SetNull)
+  authorAgent    Agent?            @relation(fields: [authorAgentId], references: [id], onDelete: SetNull)
+  revisions      ContentRevision[]
+  socialPosts    SocialPost[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([missionId])
+  @@index([type])
+  @@index([status])
+  @@map("content_items")
+}
+
+model ContentRevision {
+  id            String      @id @default(cuid())
+  contentItemId String
+  version       Int
+  content       String      @db.Text
+  summary       String?
+  authorType    String      @default("ai") // "ai" | "user"
+  createdAt     DateTime    @default(now())
+
+  contentItem   ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId])
+  @@index([contentItemId, version])
+  @@map("content_revisions")
+}
+
+// ============================================================
+// PHASE 6: CONNECTORS & SOCIAL DISTRIBUTION
+// ============================================================
+
+model ConnectorAccount {
+  id                  String       @id @default(cuid())
+  organizationId      String
+  projectId           String?
+  provider            String       // "twitter" | "linkedin" | "github" | "slack" | "webhook"
+  name                String       // e.g. "@growthos_ai" or "GrowthOS Slack Alerts"
+  encryptedCredentials String      @db.Text // AES-256-GCM encrypted tokens / secret
+  status              String       @default("connected") // "connected" | "error" | "expired"
+  errorMessage        String?
+  lastSyncAt          DateTime?
+  metadata            Json?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project             Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  socialPosts         SocialPost[]
+
+  @@unique([organizationId, provider, name])
+  @@index([organizationId])
+  @@index([provider])
+  @@index([status])
+  @@map("connector_accounts")
+}
+
+model SocialPost {
+  id                 String            @id @default(cuid())
+  organizationId     String
+  projectId          String?
+  connectorAccountId String
+  contentItemId      String?
+  provider           String            // "twitter" | "linkedin" | "github" | "slack" | "webhook"
+  status             String            @default("scheduled") // "scheduled" | "publishing" | "published" | "failed"
+  payload            Json              // { text: string, thread?: string[], mediaUrls?: string[] }
+  externalPostId     String?
+  externalPostUrl    String?
+  scheduledFor       DateTime?
+  publishedAt        DateTime?
+  errorMessage       String?
+  impressions        Int               @default(0)
+  engagements        Int               @default(0)
+  clicks             Int               @default(0)
+  metadata           Json?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  organization       Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project            Project?          @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  connectorAccount   ConnectorAccount  @relation(fields: [connectorAccountId], references: [id], onDelete: Cascade)
+  contentItem        ContentItem?      @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([connectorAccountId])
+  @@index([contentItemId])
+  @@index([status])
+  @@index([scheduledFor])
+  @@map("social_posts")
+}
+
+// ============================================================
+// PHASE 7: TECHNICAL SEO & SERP INTELLIGENCE
+// ============================================================
+
+model SeoAudit {
+  id              String       @id @default(cuid())
+  organizationId  String
+  projectId       String?
+  targetUrl       String
+  overallScore    Int          @default(85) // 0 - 100
+  titleTag        String?
+  metaDescription String?
+  canonicalUrl    String?
+  h1Count         Int          @default(1)
+  h2Count         Int          @default(4)
+  brokenLinksCount Int         @default(0)
+  loadTimeMs      Int          @default(320)
+  status          String       @default("completed") // "pending" | "completed" | "failed"
+  issues          Json         @default("[]")
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([targetUrl])
+  @@index([status])
+  @@map("seo_audits")
+}
+
+model KeywordTrack {
+  id              String       @id @default(cuid())
+  organizationId  String
+  projectId       String?
+  keyword         String
+  searchVolume    Int          @default(1200)
+  difficulty      Int          @default(45) // 0 - 100
+  currentRank     Int?
+  targetRank      Int          @default(1)
+  intent          String       @default("commercial") // "navigational" | "informational" | "commercial" | "transactional"
+  competitorsRank Json?
+  rankHistory     Json         @default("[]")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, keyword])
+  @@index([organizationId])
+  @@index([keyword])
+  @@index([currentRank])
+  @@map("keyword_tracks")
+}
+
+// ============================================================
+// PHASE 8: COMMUNITY & LEAD DISCOVERY ENGINE
+// ============================================================
+
+model Lead {
+  id              String       @id @default(cuid())
+  organizationId  String
+  projectId       String?
+  name            String
+  email           String?
+  company         String
+  title           String?
+  stage           String       @default("new") // "new" | "enriching" | "qualified" | "outreach" | "converted" | "disqualified"
+  source          String       @default("community") // "community" | "scraping" | "inbound" | "intent"
+  score           Int          @default(50) // 0 - 100
+  websiteUrl      String?
+  linkedinUrl     String?
+  twitterUrl      String?
+  enrichmentData  Json         @default("{}")
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([stage])
+  @@index([score])
+  @@index([company])
+  @@map("leads")
+}
+
+model CommunityInteraction {
+  id              String       @id @default(cuid())
+  organizationId  String
+  projectId       String?
+  platform        String       // "twitter" | "reddit" | "hackernews" | "linkedin"
+  postUrl         String
+  author          String
+  title           String?
+  content         String
+  sentiment       String       @default("neutral") // "positive" | "neutral" | "negative"
+  intentScore     Int          @default(65) // 0 - 100
+  replyDraft      String?
+  status          String       @default("unreviewed") // "unreviewed" | "approved" | "replied" | "dismissed"
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([platform])
+  @@index([status])
+  @@index([intentScore])
+  @@map("community_interactions")
+}
+
+// ============================================================
+// PHASE 9: EXPERIMENTS & ATTRIBUTION ENGINE
+// ============================================================
+
+model GrowthExperiment {
+  id              String       @id @default(cuid())
+  organizationId  String
+  projectId       String?
+  title           String
+  hypothesis      String
+  metricName      String
+  status          String       @default("draft") // "draft" | "running" | "concluded" | "cancelled"
+  variants        Json         @default("[]") // Array of { id, name, trafficShare, impressions, conversions }
+  confidence      Float        @default(0.0) // 0 - 100%
+  winningVariant  String?
+  startedAt       DateTime?
+  endedAt         DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("growth_experiments")
+}
+
+model AttributionTouch {
+  id              String       @id @default(cuid())
+  organizationId  String
+  projectId       String?
+  visitorId       String
+  channel         String       // "organic_search" | "twitter" | "linkedin" | "referral" | "direct"
+  campaignName    String?
+  touchpointType  String       // "first_touch" | "lead_creation" | "opportunity" | "deal_closed"
+  weight          Float        @default(1.0)
+  revenueImpact   Float        @default(0.0)
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([visitorId])
+  @@index([channel])
+  @@index([touchpointType])
+  @@map("attribution_touches")
+}
+
+// ============================================================
+// PHASE 10: AUTONOMOUS LOOP & DEPARTMENT ORCHESTRATOR
+// ============================================================
+
+model DepartmentCycle {
+  id                String       @id @default(cuid())
+  organizationId    String
+  projectId         String?
+  cycleNumber       Int
+  status            String       @default("active") // "active" | "completed" | "failed"
+  summary           String?
+  actionsDispatched Int          @default(0)
+  telemetry         Json?
+  startedAt         DateTime     @default(now())
+  completedAt       DateTime?
+
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project           Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([cycleNumber])
+  @@index([status])
+  @@map("department_cycles")
+}
+
+model AutonomousSchedule {
+  id              String       @id @default(cuid())
+  organizationId  String
+  projectId       String?
+  name            String
+  cronExpression  String       // e.g. "0 9 * * *"
+  isActive        Boolean      @default(true)
+  agentRole       String       // "growth_director" | "content_creator" | "seo_specialist"
+  lastRunAt       DateTime?
+  nextRunAt       DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project         Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([isActive])
+  @@map("autonomous_schedules")
 }

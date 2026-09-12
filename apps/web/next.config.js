@@ -11,6 +11,15 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.googleusercontent.com' },
     ],
   },
+  // Proxy /api/* requests to the NestJS backend
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/:path*',
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

@@ -1,4 +1,23 @@
 import { z } from 'zod';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+
+// Auto-load .env walking up from cwd until found (handles monorepo layouts)
+(function loadEnv() {
+  let dir = process.cwd();
+  for (let i = 0; i < 5; i++) {
+    const candidate = path.join(dir, '.env');
+    if (fs.existsSync(candidate)) {
+      dotenv.config({ path: candidate, override: false });
+      break;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+})();
+
 
 /**
  * Environment variable schema validated at startup.
@@ -38,8 +57,10 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),
-  AI_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'local']).default('openai'),
-  AI_DEFAULT_MODEL: z.string().default('gpt-4o-mini'),
+  SERPAPI_API_KEY: z.string().optional(),
+  BRAVE_SEARCH_API_KEY: z.string().optional(),
+  AI_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'local']).default('google'),
+  AI_DEFAULT_MODEL: z.string().default('gemini-2.0-flash'),
 
   // Email
   EMAIL_FROM: z.string().email().default('noreply@growthos.ai'),
@@ -80,11 +101,37 @@ const envSchema = z.object({
     .transform((v) => v === 'true')
     .default('false'),
 
-  // Social Connectors
+  // Social Connectors — Twitter / X
   TWITTER_CLIENT_ID: z.string().optional(),
   TWITTER_CLIENT_SECRET: z.string().optional(),
+  TWITTER_ACCESS_TOKEN: z.string().optional(),
+  TWITTER_ACCESS_SECRET: z.string().optional(),
+  TWITTER_BEARER_TOKEN: z.string().optional(),
+
+  // Social Connectors — LinkedIn
   LINKEDIN_CLIENT_ID: z.string().optional(),
   LINKEDIN_CLIENT_SECRET: z.string().optional(),
+  LINKEDIN_ACCESS_TOKEN: z.string().optional(),
+
+  // Social Connectors — Meta (Facebook + Instagram)
+  META_APP_ID: z.string().optional(),
+  META_APP_SECRET: z.string().optional(),
+  META_PAGE_ACCESS_TOKEN: z.string().optional(),
+  META_INSTAGRAM_ACCOUNT_ID: z.string().optional(),
+
+  // Social Connectors — TikTok
+  TIKTOK_CLIENT_KEY: z.string().optional(),
+  TIKTOK_CLIENT_SECRET: z.string().optional(),
+  TIKTOK_ACCESS_TOKEN: z.string().optional(),
+
+  // Social Connectors — Reddit
+  REDDIT_CLIENT_ID: z.string().optional(),
+  REDDIT_CLIENT_SECRET: z.string().optional(),
+  REDDIT_USERNAME: z.string().optional(),
+  REDDIT_PASSWORD: z.string().optional(),
+  REDDIT_USER_AGENT: z.string().default('GrowthOS/1.0'),
+
+  // Google OAuth (for Search Console)
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 });

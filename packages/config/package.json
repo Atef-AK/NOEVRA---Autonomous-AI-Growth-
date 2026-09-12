@@ -1,17 +1,19 @@
 {
-  "name": "@growthos/config",
-  "version": "0.1.0",
-  "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts"
-  },
-  "dependencies": {
-    "zod": "^3.23.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.6.0"
-  }
+    "name": "@growthos/config",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint src --ext .ts",
+        "build": "tsc -p tsconfig.json --outDir dist --noEmit false"
+    },
+    "dependencies": {
+        "dotenv": "^17.4.2",
+        "zod": "^3.23.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.6.0"
+    }
 }
