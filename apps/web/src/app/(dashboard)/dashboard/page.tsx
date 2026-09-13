@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useSession } from '@/hooks/use-session';
-import { onboarding, type OnboardingResult } from '@/lib/api';
+import { onboarding, organizations, type OnboardingResult } from '@/lib/api';
+import { getAccessToken, getStoredOrg } from '@/lib/session';
 
 const SWARM_AGENTS = [
   { id: 'orchestrator', name: 'Growth Director (Orchestrator)', icon: '⚡', role: 'Decomposes roadmap and commands the swarm' },
@@ -50,8 +51,27 @@ export default function DashboardPage() {
       return;
     }
 
-    if (!session?.organizationId || !session?.token) {
+    const token = session?.token || getAccessToken();
+    let orgId = session?.organizationId || getStoredOrg()?.id;
+
+    if (!token) {
       setError('Session expired. Please log in again.');
+      return;
+    }
+
+    if (!orgId) {
+      try {
+        const orgList = await organizations.list(token);
+        if (orgList.length > 0 && orgList[0]) {
+          orgId = orgList[0].id;
+        }
+      } catch {
+        // ignore and let next check handle
+      }
+    }
+
+    if (!orgId) {
+      setError('No active organization found. Please refresh or log in again.');
       return;
     }
 
@@ -77,7 +97,7 @@ export default function DashboardPage() {
     }, 2800);
 
     try {
-      const result = await onboarding.analyze(session.token, session.organizationId, targetUrl);
+      const result = await onboarding.analyze(token, orgId, targetUrl);
       clearInterval(interval);
       setCurrentAgentIndex(SWARM_AGENTS.length - 1);
       setSwarmResult(result);
