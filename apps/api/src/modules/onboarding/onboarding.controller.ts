@@ -96,9 +96,10 @@ export class OnboardingController {
     // Send heartbeat
     send({
       step: 0,
-      totalSteps: 7,
+      totalSteps: 9,
       stage: 'starting',
-      message: 'GrowthOS analysis pipeline starting...',
+      agent: 'Growth Director (Orchestrator)',
+      message: 'GrowthOS autonomous swarm initializing...',
       completed: false,
     });
 

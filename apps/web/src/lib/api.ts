@@ -1289,6 +1289,7 @@ export interface OnboardingProgress {
   step: number;
   totalSteps: number;
   stage: string;
+  agent?: string;
   message: string;
   data?: Record<string, unknown>;
   completed: boolean;
@@ -1296,11 +1297,67 @@ export interface OnboardingProgress {
 }
 
 export interface OnboardingResult {
-  brainId: string;
   projectId: string;
-  mission: string;
-  contentQueued: number;
-  seoAuditQueued: boolean;
+  brand?: {
+    name: string;
+    description: string;
+    products: string[];
+    targetMarket: string;
+    uniqueValueProposition: string;
+    brandTone: string;
+    primaryKeywords: string[];
+    competitors: string[];
+    icp: string;
+  };
+  seo?: {
+    auditId?: string;
+    overallScore: number;
+    keywords: Array<{ keyword: string; volume: number; rank?: number }>;
+  };
+  content?: {
+    blogPost?: {
+      id?: string;
+      title: string;
+      slug: string;
+      content: string;
+      tldr?: string;
+    };
+    linkedIn?: {
+      id?: string;
+      content: string;
+    };
+    twitter?: {
+      id?: string;
+      content: string;
+    };
+    video?: {
+      id?: string;
+      title: string;
+      content: string;
+    };
+    backlink?: {
+      id?: string;
+      title: string;
+      content: string;
+    };
+  };
+  community?: {
+    reddit?: {
+      subreddit: string;
+      threadTopic: string;
+      comment: string;
+    };
+    productHunt?: {
+      platform: string;
+      threadTopic: string;
+      comment: string;
+    };
+  };
+  mission?: {
+    id?: string;
+    title: string;
+  };
+  cycleNumber?: number;
 }
 
 export const onboarding = {
