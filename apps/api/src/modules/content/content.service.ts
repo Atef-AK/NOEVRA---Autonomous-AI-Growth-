@@ -7,7 +7,7 @@ import {
 import slugify from 'slugify';
 import { PrismaService } from '../../common/database/prisma.service';
 import { getEnv } from '@growthos/config';
-import { createModelRouter, ModelRouter } from '@growthos/ai';
+import { createModelRouter, ModelRouter, getOptimalModel } from '@growthos/ai';
 import type {
   CreateCampaignDto,
   CreateContentItemDto,
@@ -83,7 +83,7 @@ Respond strictly with valid JSON with this schema:
   "brandVoiceScore": 95
 }`;
 
-        const response = await this.modelRouter.complete('google/gemini-2.5-flash', {
+        const response = await this.modelRouter.complete(getOptimalModel('high'), {
           messages: [
             {
               role: 'system',

@@ -29,7 +29,7 @@ export class CreateAgentDto {
   @MinLength(10)
   systemPrompt!: string;
 
-  @ApiPropertyOptional({ example: 'google/gemini-2.5-flash', default: 'google/gemini-2.5-flash' })
+  @ApiPropertyOptional({ example: getOptimalModel('high'), default: getOptimalModel('high') })
   @IsOptional()
   @IsString()
   preferredModel?: string;

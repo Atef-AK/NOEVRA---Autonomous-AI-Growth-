@@ -57,11 +57,15 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_BASE_URL: z.string().url().optional(),
   OPENROUTER_API_KEY: z.string().optional(),
+  OPENCODE_API_KEY: z.string().optional(),
+  OPENCODE_BASE_URL: z.string().url().default('https://api.opencode.so/v1'),
+  ORCAROUTER_API_KEY: z.string().optional(),
+  ORCAROUTER_BASE_URL: z.string().url().default('https://api.orcarouter.ai/v1'),
   ANTHROPIC_API_KEY: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),
   SERPAPI_API_KEY: z.string().optional(),
   BRAVE_SEARCH_API_KEY: z.string().optional(),
-  AI_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'local', 'openrouter']).default('google'),
+  AI_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'local', 'openrouter', 'opencode', 'orcarouter']).default('openrouter'),
   AI_DEFAULT_MODEL: z.string().default('gemini-2.0-flash'),
 
   // Email

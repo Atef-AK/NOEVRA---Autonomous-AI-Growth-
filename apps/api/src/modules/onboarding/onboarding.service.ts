@@ -16,7 +16,7 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service';
 import { getEnv } from '@growthos/config';
-import { createModelRouter } from '@growthos/ai';
+import { createModelRouter, getOptimalModel } from '@growthos/ai';
 import { safeUrl } from '@growthos/shared';
 import slugify from 'slugify';
 
@@ -168,7 +168,7 @@ Return strictly valid JSON only:
 }`;
 
     try {
-      const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
+      const completion = await this.modelRouter.complete(getOptimalModel('low'), {
         messages: [{ role: 'user', content: brandPrompt }],
         maxTokens: 1000,
         temperature: 0.2,
@@ -337,7 +337,7 @@ Return strictly valid JSON only:
     };
 
     try {
-      const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
+      const completion = await this.modelRouter.complete(getOptimalModel('high'), {
         messages: [{ role: 'user', content: blogPrompt }],
         maxTokens: 2500,
         temperature: 0.4,
@@ -419,7 +419,7 @@ Return valid JSON only:
     };
 
     try {
-      const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
+      const completion = await this.modelRouter.complete(getOptimalModel('high'), {
         messages: [{ role: 'user', content: socialPrompt }],
         maxTokens: 1200,
         temperature: 0.5,
@@ -511,7 +511,7 @@ Return valid JSON only:
     };
 
     try {
-      const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
+      const completion = await this.modelRouter.complete(getOptimalModel('high'), {
         messages: [{ role: 'user', content: communityPrompt }],
         maxTokens: 1000,
         temperature: 0.5,
@@ -587,7 +587,7 @@ Return valid JSON only:
     };
 
     try {
-      const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
+      const completion = await this.modelRouter.complete(getOptimalModel('medium'), {
         messages: [{ role: 'user', content: videoPrompt }],
         maxTokens: 1000,
         temperature: 0.5,
@@ -644,7 +644,7 @@ Return valid JSON only:
     };
 
     try {
-      const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
+      const completion = await this.modelRouter.complete(getOptimalModel('medium'), {
         messages: [{ role: 'user', content: backlinkPrompt }],
         maxTokens: 800,
         temperature: 0.4,

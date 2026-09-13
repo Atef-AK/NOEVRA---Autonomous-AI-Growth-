@@ -108,7 +108,7 @@ export interface AIProvider {
 // Model Router config
 // ============================================================
 
-export type ProviderName = 'openai' | 'anthropic' | 'google' | 'openrouter';
+export type ProviderName = 'openai' | 'anthropic' | 'google' | 'local' | 'openrouter' | 'opencode' | 'orcarouter';
 
 export interface ModelRouterConfig {
   /** Default provider to use when no preference is specified */
@@ -164,3 +164,23 @@ export function estimateCost(
     (outputTokens / 1_000_000) * pricing.outputPer1M
   );
 }
+
+/**
+ * Returns the most efficient model for a given task complexity.
+ * Aggregators (OpenRouter, OpenCode, OrcaRouter) will fulfill this directly,
+ * while local providers will intercept it based on its prefix if needed.
+ */
+export function getOptimalModel(complexity: 'high' | 'medium' | 'low'): string {
+  switch (complexity) {
+    case 'high':
+      // Strategy, deeply nuanced copywriting
+      return 'anthropic/claude-3-5-sonnet';
+    case 'medium':
+      // Basic generations, generic processing
+      return 'openai/gpt-4o-mini';
+    case 'low':
+      // Fast extraction, web scraping, brand matching
+      return 'google/gemini-2.5-flash';
+  }
+}
+

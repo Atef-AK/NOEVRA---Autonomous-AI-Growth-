@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service';
 import { getEnv } from '@growthos/config';
-import { createModelRouter, ModelRouter } from '@growthos/ai';
+import { createModelRouter, ModelRouter, getOptimalModel } from '@growthos/ai';
 import type {
   CreateLeadDto,
   UpdateLeadDto,
@@ -268,7 +268,7 @@ export class LeadsService {
     let generatedReply = '';
     if (this.env.OPENAI_API_KEY || this.env.ANTHROPIC_API_KEY || this.env.GOOGLE_AI_API_KEY) {
       try {
-        const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
+        const completion = await this.modelRouter.complete(getOptimalModel('high'), {
           messages: [
             {
               role: 'system',

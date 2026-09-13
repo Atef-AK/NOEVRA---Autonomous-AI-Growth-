@@ -12,6 +12,10 @@ export interface AIEnvConfig {
   OPENAI_API_KEY?: string | undefined;
   OPENAI_BASE_URL?: string | undefined;
   OPENROUTER_API_KEY?: string | undefined;
+  OPENCODE_API_KEY?: string | undefined;
+  OPENCODE_BASE_URL?: string | undefined;
+  ORCAROUTER_API_KEY?: string | undefined;
+  ORCAROUTER_BASE_URL?: string | undefined;
   ANTHROPIC_API_KEY?: string | undefined;
   GOOGLE_AI_API_KEY?: string | undefined;
   /** Override default provider */
@@ -28,6 +32,18 @@ export function createModelRouter(env: AIEnvConfig): ModelRouter {
     // OpenRouter uses the exact same interface as OpenAI
     providers.openrouter = new OpenAIProvider(env.OPENROUTER_API_KEY, 'https://openrouter.ai/api/v1');
   }
+  if (env.OPENCODE_API_KEY) {
+    providers.opencode = new OpenAIProvider(
+      env.OPENCODE_API_KEY,
+      env.OPENCODE_BASE_URL || 'https://api.opencode.so/v1'
+    );
+  }
+  if (env.ORCAROUTER_API_KEY) {
+    providers.orcarouter = new OpenAIProvider(
+      env.ORCAROUTER_API_KEY,
+      env.ORCAROUTER_BASE_URL || 'https://api.orcarouter.ai/v1'
+    );
+  }
   if (env.ANTHROPIC_API_KEY) {
     providers.anthropic = new AnthropicProvider(env.ANTHROPIC_API_KEY);
   }
@@ -35,8 +51,15 @@ export function createModelRouter(env: AIEnvConfig): ModelRouter {
     providers.google = new GoogleProvider(env.GOOGLE_AI_API_KEY);
   }
 
-  // Determine default: use configured env, then preference order (Gemini first)
-  const preferenceOrder: ProviderName[] = ['google', 'openai', 'anthropic'];
+  // Determine default: use configured env, then preference order (aggregators first)
+  const preferenceOrder: ProviderName[] = [
+    'openrouter',
+    'opencode',
+    'orcarouter',
+    'google',
+    'openai',
+    'anthropic'
+  ];
   const envDefault = env.AI_DEFAULT_PROVIDER as ProviderName | undefined;
 
   const defaultProvider: ProviderName =

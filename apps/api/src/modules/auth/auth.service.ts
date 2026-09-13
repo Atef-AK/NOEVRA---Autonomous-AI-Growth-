@@ -110,7 +110,7 @@ export class AuthService {
             description: agentDef.description,
             systemPrompt: agentDef.systemPrompt,
             allowedTools: agentDef.allowedTools as any,
-            preferredModel: 'google/gemini-2.5-flash',
+            preferredModel: getOptimalModel('high'),
             maxSteps: agentDef.maxSteps,
             maxTokens: agentDef.maxTokens,
             temperatureX10: agentDef.temperatureX10,

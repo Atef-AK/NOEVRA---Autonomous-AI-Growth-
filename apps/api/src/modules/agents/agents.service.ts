@@ -8,7 +8,7 @@ import {
 import slugify from 'slugify';
 import { PrismaService } from '../../common/database/prisma.service';
 import { getEnv } from '@growthos/config';
-import { createModelRouter, ModelRouter } from '@growthos/ai';
+import { createModelRouter, ModelRouter, getOptimalModel } from '@growthos/ai';
 import { createDefaultRegistry, ToolRegistry } from '@growthos/tools';
 import { AgentExecutor } from '@growthos/agent-runtime';
 import { ALL_SPECIALIZED_AGENTS } from '@growthos/agent-sdk';
@@ -89,7 +89,7 @@ export class AgentsService {
             description: agentDef.description,
             systemPrompt: agentDef.systemPrompt,
             allowedTools: agentDef.allowedTools as any,
-            preferredModel: 'google/gemini-2.5-flash',
+            preferredModel: getOptimalModel('high'),
             maxSteps: agentDef.maxSteps,
             maxTokens: agentDef.maxTokens,
             temperatureX10: agentDef.temperatureX10,
@@ -143,7 +143,7 @@ export class AgentsService {
         slug,
         description: dto.description ?? null,
         systemPrompt: dto.systemPrompt,
-        preferredModel: dto.preferredModel ?? 'google/gemini-2.5-flash',
+        preferredModel: dto.preferredModel ?? getOptimalModel('high'),
         allowedTools: dto.allowedTools ?? ['web_search', 'fetch_url', 'calculator'],
         maxSteps: dto.maxSteps ?? 10,
         maxTokens: dto.maxTokens ?? 4096,
