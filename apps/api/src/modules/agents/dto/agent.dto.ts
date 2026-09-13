@@ -10,6 +10,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { getOptimalModel } from '@growthos/ai';
 
 export class CreateAgentDto {
   @ApiProperty({ example: 'SEO Research Agent' })

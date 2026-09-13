@@ -14,6 +14,7 @@ import slugify from 'slugify';
 import { PrismaService } from '../../common/database/prisma.service';
 import { getEnv } from '@growthos/config';
 import { ALL_SPECIALIZED_AGENTS } from '@growthos/agent-sdk';
+import { getOptimalModel } from '@growthos/ai';
 import type { JwtPayload } from './strategies/jwt.strategy';
 import type {
   RegisterDto,
