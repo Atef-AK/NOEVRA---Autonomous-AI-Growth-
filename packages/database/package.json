@@ -14,7 +14,8 @@
                     "typecheck":  "tsc --noEmit",
                     "lint":  "eslint src --ext .ts",
                     "test":  "vitest run",
-                    "build":  "prisma generate && tsc -p tsconfig.json --outDir dist --noEmit false"
+                    "build":  "prisma generate && tsc -p tsconfig.json --outDir dist --noEmit false",
+                    "postinstall": "prisma generate"
                 },
     "dependencies":  {
                          "@prisma/client":  "^5.20.0",
