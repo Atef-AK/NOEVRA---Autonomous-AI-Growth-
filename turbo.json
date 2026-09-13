@@ -8,7 +8,9 @@
     "NEXT_PUBLIC_APP_URL",
     "NODE_ENV",
     "JWT_SECRET",
-    "API_URL"
+    "API_URL",
+    "APP_URL",
+    "ENCRYPTION_KEY"
   ],
   "tasks": {
     "build": {

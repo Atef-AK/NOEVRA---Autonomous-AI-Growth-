@@ -6,7 +6,6 @@
  *   const router = new ModelRouter(config);
  *   const response = await router.complete('openai/gpt-4o', { messages: [...] });
  */
-import pRetry from 'p-retry';
 import type {
   AIProvider,
   CompletionRequest,
@@ -14,6 +13,33 @@ import type {
   ModelRouterConfig,
   ProviderName,
 } from './types';
+
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  opts: {
+    retries: number;
+    minTimeout: number;
+    factor: number;
+    shouldRetry: (err: unknown) => boolean;
+    onFailedAttempt?: (err: unknown) => void;
+  },
+): Promise<T> {
+  let attempt = 0;
+  let delay = opts.minTimeout;
+  while (true) {
+    try {
+      return await fn();
+    } catch (err) {
+      attempt++;
+      if (attempt > opts.retries || !opts.shouldRetry(err)) {
+        throw err;
+      }
+      opts.onFailedAttempt?.(err);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay *= opts.factor;
+    }
+  }
+}
 
 /** Errors that should NOT be retried (auth, quota) */
 const PERMANENT_ERROR_CODES = new Set([401, 403, 404, 422]);
@@ -108,17 +134,16 @@ export class ModelRouter {
   ): Promise<CompletionResponse> {
     const provider = this.getProvider(providerName);
 
-    return pRetry(
+    return retryWithBackoff(
       () => provider.complete(model, request),
       {
         retries: 2,
         minTimeout: 1000,
-        maxTimeout: 8000,
         factor: 2,
         shouldRetry: (err) => isTransientError(err),
-        onFailedAttempt: (err) => {
+        onFailedAttempt: (err: any) => {
           console.warn(
-            `[ModelRouter] ${providerName}/${model} attempt ${err.attemptNumber} failed: ${err.message}`,
+            `[ModelRouter] ${providerName}/${model} attempt failed: ${err?.message ?? err}`,
           );
         },
       },

@@ -13,7 +13,7 @@ const nextConfig = {
   },
   // Proxy /api/* requests to the NestJS backend
   async rewrites() {
-    const apiTarget = (process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
+    const apiTarget = (process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://noevra-growthos-api.vercel.app').replace(/\/+$/, '');
     return [
       {
         source: '/api/:path*',
