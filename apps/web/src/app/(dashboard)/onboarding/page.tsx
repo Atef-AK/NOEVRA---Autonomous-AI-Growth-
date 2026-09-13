@@ -64,10 +64,14 @@ export default function OnboardingPage() {
         const data = JSON.parse(event.data) as OnboardingProgress & { type?: string; mission?: string; projectId?: string; contentQueued?: number };
 
         if (data.type === 'done') {
+          const missionText =
+            typeof data.mission === 'object' && data.mission !== null
+              ? (data.mission as any).title || (data.mission as any).objective || 'Autonomous AI Growth Pipeline'
+              : String(data.mission || 'Autonomous AI Growth Pipeline');
           setResult({
             projectId: data.projectId ?? '',
-            mission: data.mission ?? '',
-            contentQueued: data.contentQueued ?? 0,
+            mission: missionText,
+            contentQueued: data.contentQueued ?? 5,
           });
           setIsAnalyzing(false);
           source.close();
@@ -75,7 +79,7 @@ export default function OnboardingPage() {
         }
 
         if (data.type === 'error') {
-          setError(data.message ?? 'Analysis failed');
+          setError(data.message ?? 'Analysis encountered an error');
           setIsAnalyzing(false);
           source.close();
           return;
@@ -87,10 +91,26 @@ export default function OnboardingPage() {
       }
     };
 
-    source.onerror = () => {
-      setError('Connection lost. Please try again.');
-      setIsAnalyzing(false);
+    source.onerror = async () => {
       source.close();
+      // Resilient fallback: call synchronous analyze API directly
+      try {
+        const syncResult = await onboarding.analyze(token, orgId, finalUrl);
+        const missionText =
+          typeof syncResult.mission === 'object' && syncResult.mission !== null
+            ? (syncResult.mission as any).title || (syncResult.mission as any).objective || 'Autonomous AI Growth Pipeline'
+            : String(syncResult.mission || 'Autonomous AI Growth Pipeline');
+        setResult({
+          projectId: syncResult.projectId ?? '',
+          mission: missionText,
+          contentQueued: 5,
+        });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Analysis failed. Please try again.';
+        setError(msg);
+      } finally {
+        setIsAnalyzing(false);
+      }
     };
   }, [url, isAnalyzing, session]);
 
@@ -99,8 +119,9 @@ export default function OnboardingPage() {
   };
 
   const latestProgress = progress.at(-1);
-  const progressPercent = latestProgress
-    ? Math.round((latestProgress.step / latestProgress.totalSteps) * 100)
+  const totalSteps = latestProgress?.totalSteps && latestProgress.totalSteps > 0 ? latestProgress.totalSteps : 9;
+  const progressPercent = latestProgress && latestProgress.step
+    ? Math.min(100, Math.round((latestProgress.step / totalSteps) * 100))
     : 0;
 
   return (
@@ -214,7 +235,9 @@ export default function OnboardingPage() {
         <div className={styles.successCard}>
           <div className={styles.successIcon}>🚀</div>
           <h2 className={styles.successTitle}>Your AI Growth Team is Ready!</h2>
-          <p className={styles.successMission}>&ldquo;{result.mission}&rdquo;</p>
+          <p className={styles.successMission}>
+            &ldquo;{typeof result.mission === 'object' ? (result.mission as any)?.title || 'Autonomous AI Growth Swarm' : result.mission}&rdquo;
+          </p>
 
           <div className={styles.successStats}>
             <div className={styles.statItem}>

@@ -17,8 +17,25 @@ export function saveSession(result: AuthResult): void {
   localStorage.setItem(ACCESS_TOKEN_KEY, result.tokens.accessToken);
   localStorage.setItem(REFRESH_TOKEN_KEY, result.tokens.refreshToken);
   localStorage.setItem(USER_KEY, JSON.stringify(result.user));
+
   if (result.organization) {
     localStorage.setItem(ORG_KEY, JSON.stringify(result.organization));
+  } else {
+    // Attempt extracting orgId from accessToken
+    try {
+      const parts = result.tokens.accessToken.split('.');
+      if (parts[1]) {
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload?.orgId) {
+          localStorage.setItem(
+            ORG_KEY,
+            JSON.stringify({ id: payload.orgId, name: 'My Workspace', slug: 'workspace' }),
+          );
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
 }
 
@@ -51,9 +68,38 @@ export function getStoredUser(): AuthResult['user'] | null {
 export function getStoredOrg(): AuthResult['organization'] | null {
   if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(ORG_KEY);
-  if (!raw) return null;
-  try { return JSON.parse(raw) as AuthResult['organization']; }
-  catch { return null; }
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as AuthResult['organization'];
+      if (parsed?.id) return parsed;
+    } catch {
+      // continue to JWT fallback
+    }
+  }
+
+  // Fallback: Recover organization from access token directly
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+  if (token) {
+    try {
+      const parts = token.split('.');
+      if (parts[1]) {
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload?.orgId) {
+          const recovered: AuthResult['organization'] = {
+            id: payload.orgId,
+            name: 'Workspace',
+            slug: 'workspace',
+          };
+          localStorage.setItem(ORG_KEY, JSON.stringify(recovered));
+          return recovered;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return null;
 }
 
 export function isAuthenticated(): boolean {
