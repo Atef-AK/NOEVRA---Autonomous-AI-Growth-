@@ -115,7 +115,7 @@ export class AgentExecutor {
     const [providerName, ...modelParts] = agent.preferredModel.split('/');
     const modelStr = modelParts.length > 0
       ? agent.preferredModel
-      : `openai/${agent.preferredModel}`;
+      : `google/${agent.preferredModel}`;
 
     while (stepIndex < agent.maxSteps && finalAnswer === null) {
       let completion: CompletionResponse;

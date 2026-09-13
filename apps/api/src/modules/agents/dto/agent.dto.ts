@@ -29,7 +29,7 @@ export class CreateAgentDto {
   @MinLength(10)
   systemPrompt!: string;
 
-  @ApiPropertyOptional({ example: 'openai/gpt-4o', default: 'openai/gpt-4o' })
+  @ApiPropertyOptional({ example: 'google/gemini-2.5-flash', default: 'google/gemini-2.5-flash' })
   @IsOptional()
   @IsString()
   preferredModel?: string;

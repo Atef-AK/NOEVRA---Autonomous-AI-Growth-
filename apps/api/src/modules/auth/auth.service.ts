@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import slugify from 'slugify';
 import { PrismaService } from '../../common/database/prisma.service';
 import { getEnv } from '@growthos/config';
+import { ALL_SPECIALIZED_AGENTS } from '@growthos/agent-sdk';
 import type { JwtPayload } from './strategies/jwt.strategy';
 import type {
   RegisterDto,
@@ -96,6 +97,40 @@ export class AuthService {
           role: 'owner',
           inviteStatus: 'accepted',
           joinedAt: new Date(),
+        },
+      });
+
+      // Provision all 13 canonical specialized agents for the new workspace
+      for (const agentDef of ALL_SPECIALIZED_AGENTS) {
+        await tx.agent.create({
+          data: {
+            organizationId: newOrg.id,
+            name: agentDef.name,
+            slug: agentDef.slug,
+            description: agentDef.description,
+            systemPrompt: agentDef.systemPrompt,
+            allowedTools: agentDef.allowedTools as any,
+            preferredModel: 'google/gemini-2.5-flash',
+            maxSteps: agentDef.maxSteps,
+            maxTokens: agentDef.maxTokens,
+            temperatureX10: agentDef.temperatureX10,
+            isActive: true,
+          },
+        });
+      }
+
+      // Provision primary company brain
+      await tx.companyBrain.create({
+        data: {
+          organizationId: newOrg.id,
+          name: 'Primary Brain',
+          summary: `${orgName} knowledge base and growth directives.`,
+          brandVoice: 'Authoritative, clear, engineering-grade, data-driven.',
+          targetAudience: 'Prospective buyers and ideal customer profile leads.',
+          valueProps: ['Autonomous multi-agent execution', 'Continuous attribution', 'Zero-friction growth'],
+          competitors: [],
+          positioning: 'Autonomous AI Growth Platform',
+          version: 1,
         },
       });
 

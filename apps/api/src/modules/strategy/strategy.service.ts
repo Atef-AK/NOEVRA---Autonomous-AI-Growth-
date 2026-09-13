@@ -192,18 +192,20 @@ Format response strictly as JSON with this schema:
         this.env.ANTHROPIC_API_KEY ||
         this.env.GOOGLE_AI_API_KEY
       ) {
-        const response = await this.modelRouter.complete('openai/gpt-4o', {
+        const response = await this.modelRouter.complete('google/gemini-2.5-flash', {
           messages: [
             {
               role: 'system',
               content:
-                'You are an expert Head of Growth and autonomous agent director. Always output valid JSON.',
+                'You are an expert Head of Growth and autonomous agent director. Always output valid JSON only.',
             },
             { role: 'user', content: prompt },
           ],
         });
 
-        decompositionData = JSON.parse(response.text ?? '{}');
+        const rawText = response.text ?? '{}';
+        const cleanJson = rawText.replace(/```(?:json)?\n?([\s\S]*?)\n?```/, '$1').trim();
+        decompositionData = JSON.parse(cleanJson);
       } else {
         decompositionData = this.getHeuristicDecomposition(goal);
       }

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@growthos/agent-runtime": "workspace:*",
+    "@growthos/agent-sdk": "workspace:*",
     "@growthos/ai": "workspace:*",
     "@growthos/config": "workspace:*",
     "@growthos/database": "workspace:*",

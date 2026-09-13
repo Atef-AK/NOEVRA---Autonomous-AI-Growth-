@@ -11,7 +11,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'executive',
     description: 'Autonomous Chief Growth Officer orchestrating the 12 specialized agents, validating budgets, and setting strategic objectives.',
     systemPrompt: 'You are the Executive Growth Director of GrowthOS. You orchestrate cross-functional multi-agent missions, supervise strategy decomposition, enforce deterministic safety constraints, and align every autonomous action with company revenue and brand guidelines.',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url', 'calculator'],
     maxSteps: 15,
     maxTokens: 8192,
@@ -27,7 +27,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'strategy',
     description: 'Deconstructs high-level business goals into tactical quarterly OKRs, mission pipelines, and prioritized RICE backlogs.',
     systemPrompt: 'You are the Growth Strategy Specialist. Your mission is to decompose top-level North Star metrics into quantified growth initiatives, evaluate Reach, Impact, Confidence, and Effort (RICE), and maintain the backlog of high-leverage growth experiments.',
-    preferredModel: 'anthropic/claude-3-5-sonnet',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url', 'calculator'],
     maxSteps: 12,
     maxTokens: 6144,
@@ -43,7 +43,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'research',
     description: 'Conducts deep qualitative and quantitative market discovery, ICP persona definition, and buying trigger analysis.',
     systemPrompt: 'You are an elite Market Research Analyst. You scan industry trends, analyze user pain points, synthesize customer interview transcripts, and deliver evidence-backed market research reports to power product marketing and positioning.',
-    preferredModel: 'google/gemini-1.5-pro',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url'],
     maxSteps: 10,
     maxTokens: 4096,
@@ -59,7 +59,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'company-intel',
     description: 'Curates company identity, brand tone-of-voice, positioning guidelines, and semantic knowledge memory.',
     systemPrompt: 'You are the Company Intelligence and Brand Voice Guardian. You maintain absolute consistency across all company collateral, enforcing tone-of-voice, approved terminology, core value propositions, and historical brand memory.',
-    preferredModel: 'anthropic/claude-3-5-sonnet',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url'],
     maxSteps: 8,
     maxTokens: 4096,
@@ -75,7 +75,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'competitor-intel',
     description: 'Monitors competitor pricing structures, feature releases, changelogs, and messaging shifts to discover market moats.',
     systemPrompt: 'You are an autonomous Competitive Intelligence Analyst. You continuously inspect competitor websites, pricing pages, social announcements, and review platforms to detect strategic positioning gaps and defensive growth opportunities.',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url'],
     maxSteps: 10,
     maxTokens: 4096,
@@ -91,7 +91,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'seo',
     description: 'Analyzes keyword intent clusters, SERP ranking movements, crawl health, Core Web Vitals, and backlink authority.',
     systemPrompt: 'You are a Staff Technical SEO Specialist. You evaluate organic search intent, compute keyword difficulty vs business value, run automated site crawl audits, detect cannibalization, and architect programmatic content silos.',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url', 'calculator'],
     maxSteps: 12,
     maxTokens: 6144,
@@ -107,7 +107,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'content',
     description: 'Generates long-form technical pillar posts, case studies, changelogs, and repurposes assets across 5+ distribution formats.',
     systemPrompt: 'You are an authoritative Content Creator and Editor. You produce comprehensive, highly readable engineering-grade articles, whitepapers, and guides without marketing fluff, ensuring full adherence to brand guidelines and SEO briefs.',
-    preferredModel: 'anthropic/claude-3-5-sonnet',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url'],
     maxSteps: 12,
     maxTokens: 8192,
@@ -123,7 +123,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'media',
     description: 'Designs OpenGraph cards, infographics, architectural diagrams, and banner assets optimized for high engagement.',
     systemPrompt: 'You are a Creative Media Designer. You conceptualize and generate engaging visual assets, architectural diagrams, social preview cards, and promotional infographics aligned with corporate visual design tokens.',
-    preferredModel: 'google/gemini-1.5-pro',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'calculator'],
     maxSteps: 8,
     maxTokens: 4096,
@@ -139,7 +139,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'social',
     description: 'Crafts high-converting Twitter/X threads, LinkedIn carousels, and distribution hooks scheduled for peak resonance.',
     systemPrompt: 'You are an expert Social Media Distribution Strategist. You dissect complex technical topics into viral, insight-dense Twitter threads and LinkedIn thought-leadership carousels with compelling hooks and natural engagement drivers.',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'calculator'],
     maxSteps: 8,
     maxTokens: 4096,
@@ -155,7 +155,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'community',
     description: 'Listens across Reddit, Hacker News, X, and GitHub for discussions matching buying intent, drafting value-first replies.',
     systemPrompt: 'You are an authentic Developer Relations and Community Advocate. You identify active conversations on Reddit, GitHub, and Twitter where users seek solutions, drafting high-value, transparent, and helpful answers without overt sales pitching.',
-    preferredModel: 'anthropic/claude-3-5-sonnet',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url'],
     maxSteps: 8,
     maxTokens: 4096,
@@ -171,7 +171,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'lead',
     description: 'Discovers high-fit ICP accounts, enriches firmographic and technographic data, and calculates predictive propensity scores.',
     systemPrompt: 'You are a B2B Lead Intelligence and Account Scoring Specialist. You evaluate target company profiles, discover relevant decision makers, synthesize technographic signals, and assign predictive qualification scores.',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url', 'calculator'],
     maxSteps: 10,
     maxTokens: 4096,
@@ -187,7 +187,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'analytics',
     description: 'Calculates multi-touch attribution (First, Last, Linear, W-Shaped), CAC payback, and channel ROI velocity.',
     systemPrompt: 'You are a Quantitative Growth Analyst. You track multi-touch attribution models, evaluate customer acquisition costs (CAC), payback periods, cohort retention curves, and pinpoint high-velocity growth channels.',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['calculator', 'fetch_url'],
     maxSteps: 8,
     maxTokens: 4096,
@@ -203,7 +203,7 @@ const DEFAULT_AGENTS_SEED = [
     slug: 'learning',
     description: 'Analyzes campaign retrospectives, prompt token efficiencies, and continuously refines agent routing weights.',
     systemPrompt: 'You are the Autonomous Loop Optimizer and Meta-Learning Agent. You analyze execution traces, model latency, conversion variances, and token economics across the 12 peer agents, continuously generating calibrated prompt adjustments and policy refinements.',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['calculator', 'fetch_url'],
     maxSteps: 10,
     maxTokens: 4096,
@@ -233,7 +233,7 @@ export default function AgentsPage() {
     name: '',
     description: '',
     systemPrompt: '',
-    preferredModel: 'openai/gpt-4o',
+    preferredModel: 'google/gemini-2.5-flash',
     allowedTools: ['web_search', 'fetch_url', 'calculator'],
     maxSteps: 10,
     maxTokens: 4096,
@@ -339,7 +339,7 @@ export default function AgentsPage() {
       name: '',
       description: '',
       systemPrompt: '',
-      preferredModel: 'openai/gpt-4o',
+      preferredModel: 'google/gemini-2.5-flash',
       allowedTools: ['web_search', 'fetch_url', 'calculator'],
       maxSteps: 10,
       maxTokens: 4096,
@@ -379,7 +379,7 @@ export default function AgentsPage() {
           toolError: null,
           inputTokens: 120,
           outputTokens: 45,
-          provider: selectedAgent.preferredModel.split('/')[0] ?? 'openai',
+          provider: selectedAgent.preferredModel.split('/')[0] ?? 'google',
           model: selectedAgent.preferredModel,
           latencyMs: 320,
           createdAt: new Date().toISOString(),
@@ -415,7 +415,7 @@ export default function AgentsPage() {
           toolError: null,
           inputTokens: 240,
           outputTokens: 80,
-          provider: selectedAgent.preferredModel.split('/')[0] ?? 'openai',
+          provider: selectedAgent.preferredModel.split('/')[0] ?? 'google',
           model: selectedAgent.preferredModel,
           latencyMs: 540,
           createdAt: new Date().toISOString(),
@@ -474,7 +474,7 @@ export default function AgentsPage() {
           toolError: null,
           inputTokens: 480,
           outputTokens: 210,
-          provider: selectedAgent.preferredModel.split('/')[0] ?? 'openai',
+          provider: selectedAgent.preferredModel.split('/')[0] ?? 'google',
           model: selectedAgent.preferredModel,
           latencyMs: 780,
           createdAt: new Date().toISOString(),
@@ -659,9 +659,9 @@ export default function AgentsPage() {
         }}
       >
         {filteredAgents.map((agent) => {
-          const provider = agent.preferredModel.split('/')[0] ?? 'openai';
+          const provider = agent.preferredModel.split('/')[0] ?? 'google';
           const providerColor =
-            provider === 'openai' ? '#10b981' : provider === 'anthropic' ? '#f59e0b' : '#3b82f6';
+            provider === 'google' ? '#3b82f6' : provider === 'openai' ? '#10b981' : '#f59e0b';
 
           return (
             <div
@@ -1103,10 +1103,12 @@ export default function AgentsPage() {
                   onChange={(e) => setCreateForm({ ...createForm, preferredModel: e.target.value })}
                   style={{ width: '100%' }}
                 >
+                  <option value="google/gemini-2.5-flash">Google — Gemini 2.5 Flash (Recommended · Ultra Fast & Reliable)</option>
+                  <option value="google/gemini-3.6-flash">Google — Gemini 3.6 Flash (Next-Gen Gemini Reasoning)</option>
+                  <option value="google/gemini-2.5-pro">Google — Gemini 2.5 Pro (Deep Strategy & Multimodal)</option>
                   <option value="openai/gpt-4o">OpenAI — GPT-4o (State of the art)</option>
                   <option value="openai/gpt-4o-mini">OpenAI — GPT-4o Mini (High speed, low cost)</option>
                   <option value="anthropic/claude-3-5-sonnet">Anthropic — Claude 3.5 Sonnet (Superior reasoning)</option>
-                  <option value="google/gemini-1.5-pro">Google — Gemini 1.5 Pro (Massive context window)</option>
                 </select>
               </div>
 

@@ -265,7 +265,7 @@ export class LeadsService {
     let generatedReply = '';
     if (this.env.OPENAI_API_KEY || this.env.ANTHROPIC_API_KEY || this.env.GOOGLE_AI_API_KEY) {
       try {
-        const completion = await this.modelRouter.complete('openai/gpt-4o', {
+        const completion = await this.modelRouter.complete('google/gemini-2.5-flash', {
           messages: [
             {
               role: 'system',

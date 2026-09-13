@@ -80,17 +80,19 @@ Respond strictly with valid JSON with this schema:
   "brandVoiceScore": 95
 }`;
 
-        const response = await this.modelRouter.complete('openai/gpt-4o', {
+        const response = await this.modelRouter.complete('google/gemini-2.5-flash', {
           messages: [
             {
               role: 'system',
-              content: 'You are an autonomous AI content specialist. Always output valid JSON.',
+              content: 'You are an autonomous AI content specialist. Always output valid JSON only.',
             },
             { role: 'user', content: prompt },
           ],
         });
 
-        generated = JSON.parse(response.text ?? '{}');
+        const rawText = response.text ?? '{}';
+        const cleanJson = rawText.replace(/```(?:json)?\n?([\s\S]*?)\n?```/, '$1').trim();
+        generated = JSON.parse(cleanJson);
       } catch (err) {
         this.logger.warn(
           `AI content generation failed, falling back to deterministic heuristic generator: ${

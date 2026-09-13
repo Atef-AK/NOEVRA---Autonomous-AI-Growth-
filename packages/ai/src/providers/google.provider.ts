@@ -14,11 +14,15 @@ import { estimateCost } from '../types';
 const SUPPORTED_MODELS = [
   'gemini-2.5-flash',          // Latest — fastest, best quality
   'gemini-2.5-flash-preview',  // Preview alias
-  'gemini-2.0-flash',          // Stable
+  'gemini-3.6-flash',          // Gemini 3.6 Flash
+  'gemini-3.8-flash',          // Gemini 3.8 Flash
+  'gemini-2.5-pro',            // High reasoning pro model
+  'gemini-flash-latest',       // Alias
+  'gemini-pro-latest',         // Alias
+  'gemini-2.0-flash',          // Stable fallback
   'gemini-2.0-flash-lite',     // Economy
   'gemini-1.5-pro',
   'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
 ] as const;
 
 const SAFETY_SETTINGS = [

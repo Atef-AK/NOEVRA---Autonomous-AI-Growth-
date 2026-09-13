@@ -243,8 +243,8 @@ model Agent {
   systemPrompt   String   @db.Text
   // JSON-serialized list of tool names this agent is allowed to use
   allowedTools   Json     @default("[]")
-  // Which AI provider+model to prefer (e.g. "openai/gpt-4o")
-  preferredModel String   @default("openai/gpt-4o")
+  // Which AI provider+model to prefer (e.g. "google/gemini-2.5-flash")
+  preferredModel String   @default("google/gemini-2.5-flash")
   maxSteps       Int      @default(10)
   maxTokens      Int      @default(4096)
   temperatureX10 Int      @default(7) // temperature * 10 to avoid float storage issues

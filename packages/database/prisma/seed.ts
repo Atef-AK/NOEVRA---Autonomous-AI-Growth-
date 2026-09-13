@@ -1,3 +1,26 @@
+import * as path from 'path';
+import * as fs from 'fs';
+
+function loadEnv() {
+  const envPath = path.resolve(__dirname, '../../../.env');
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const idx = trimmed.indexOf('=');
+      if (idx !== -1) {
+        const key = trimmed.slice(0, idx).trim();
+        const value = trimmed.slice(idx + 1).trim();
+        if (!process.env[key]) {
+          process.env[key] = value.replace(/^["']|["']$/g, '');
+        }
+      }
+    }
+  }
+}
+loadEnv();
+
 import { PrismaClient } from '@prisma/client';
 import { ALL_SPECIALIZED_AGENTS } from '@growthos/agent-sdk';
 
@@ -21,10 +44,10 @@ async function main() {
 
   // 2. Seed Admin User
   // Secure default hash for GrowthOS123!
-  const passwordHash = '$2a$10$w85GqQ9F.Kj7qKkUjGgHeeH3iP1WkX0dI0k.c0zQ6.F7jT/b5H4Ky';
+  const passwordHash = '$2b$12$F2Srkb3gKYV5uQf.CI7S6.dW5ozyR.yMvESzP2GesEaselV0pHoyC';
   const user = await prisma.user.upsert({
     where: { email: 'admin@growthos.ai' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'admin@growthos.ai',
       passwordHash,
@@ -66,12 +89,8 @@ async function main() {
       organizationId: org.id,
       name: 'NOEVRA Main',
       slug: 'noevra-main',
-      domain: 'https://growthos.ai',
+      websiteUrl: 'https://growthos.ai',
       description: 'Autonomous AI Growth Platform Main Flagship Project',
-      brandName: 'GrowthOS',
-      brandVoice: 'authoritative, insightful, data-driven, engineering-grade, bold',
-      targetAudience: 'Founders, Growth Leaders, Engineering Directors, Technical Marketers',
-      valueProposition: 'Autonomous multi-agent growth engine replacing fragmented marketing tools',
     },
   });
   console.log(`✅ Project seeded: ${project.name} (${project.id})`);
@@ -91,10 +110,10 @@ async function main() {
         description: agentDef.description,
         systemPrompt: agentDef.systemPrompt,
         allowedTools: agentDef.allowedTools as any,
-        preferredModel: agentDef.preferredModel,
+        preferredModel: 'google/gemini-2.5-flash',
         maxSteps: agentDef.maxSteps,
         maxTokens: agentDef.maxTokens,
-        temperatureX10: Math.round(agentDef.temperature * 10),
+        temperatureX10: agentDef.temperatureX10,
         isActive: true,
       },
       create: {
@@ -105,10 +124,10 @@ async function main() {
         description: agentDef.description,
         systemPrompt: agentDef.systemPrompt,
         allowedTools: agentDef.allowedTools as any,
-        preferredModel: agentDef.preferredModel,
+        preferredModel: 'google/gemini-2.5-flash',
         maxSteps: agentDef.maxSteps,
         maxTokens: agentDef.maxTokens,
-        temperatureX10: Math.round(agentDef.temperature * 10),
+        temperatureX10: agentDef.temperatureX10,
         isActive: true,
       },
     });
@@ -206,7 +225,7 @@ async function main() {
       organizationId: org.id,
       projectId: project.id,
       missionId: mission.id,
-      agentId: execAgent?.id,
+      agentId: execAgent?.id ?? null,
       title: 'Synthesize Weekly Multi-Agent Growth Report',
       description: 'Analyze keyword movement, social impressions, and conversion velocity.',
       status: 'completed',
@@ -251,7 +270,7 @@ async function main() {
       organizationId: org.id,
       projectId: project.id,
       missionId: mission.id,
-      authorAgentId: contentAgent?.id,
+      authorAgentId: contentAgent?.id ?? null,
       title: 'Why Autonomous Growth Engines Beat Traditional Marketing Stacks',
       slug: 'autonomous-growth-engines-vs-traditional-stacks',
       type: 'blog_post',

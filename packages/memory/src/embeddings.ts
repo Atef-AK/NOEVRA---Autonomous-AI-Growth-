@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 /**
  * Embedding Providers and Vector Similarity Functions
  */
@@ -120,5 +122,42 @@ export class DeterministicEmbeddingProvider implements EmbeddingProvider {
     }
 
     return vector;
+  }
+}
+
+/**
+ * Google Gemini text-embedding-001 provider (3072 dimensions).
+ */
+export class GeminiEmbeddingProvider implements EmbeddingProvider {
+  readonly dimensions = 3072;
+  private readonly client: GoogleGenerativeAI;
+  private readonly modelName: string;
+
+  constructor(apiKey: string, modelName: string = 'gemini-embedding-001') {
+    this.client = new GoogleGenerativeAI(apiKey);
+    this.modelName = modelName;
+  }
+
+  async embedQuery(text: string): Promise<number[]> {
+    const model = this.client.getGenerativeModel({ model: this.modelName });
+    const result = await model.embedContent(text);
+    if (!result.embedding?.values) {
+      throw new Error('No embedding values returned by Gemini');
+    }
+    return result.embedding.values;
+  }
+
+  async embedBatch(texts: string[]): Promise<number[][]> {
+    if (texts.length === 0) return [];
+    const model = this.client.getGenerativeModel({ model: this.modelName });
+    const results: number[][] = [];
+    for (const text of texts) {
+      const result = await model.embedContent(text);
+      if (!result.embedding?.values) {
+        throw new Error('No embedding values returned by Gemini');
+      }
+      results.push(result.embedding.values);
+    }
+    return results;
   }
 }

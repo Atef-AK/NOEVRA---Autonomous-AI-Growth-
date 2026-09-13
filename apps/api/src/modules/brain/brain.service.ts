@@ -13,6 +13,7 @@ import {
   chunkText,
   estimateTokens,
   findSimilarItems,
+  GeminiEmbeddingProvider,
   OpenAIEmbeddingProvider,
   DeterministicEmbeddingProvider,
   type EmbeddingProvider,
@@ -27,9 +28,14 @@ export class BrainService {
   private readonly embeddingProvider: EmbeddingProvider;
 
   constructor(private readonly prisma: PrismaService) {
-    if (this.env.OPENAI_API_KEY) {
+    if (this.env.GOOGLE_AI_API_KEY) {
+      this.logger.log('BrainService: Initialized with GeminiEmbeddingProvider (3072-dim)');
+      this.embeddingProvider = new GeminiEmbeddingProvider(this.env.GOOGLE_AI_API_KEY);
+    } else if (this.env.OPENAI_API_KEY && !this.env.OPENAI_API_KEY.includes('placeholder')) {
+      this.logger.log('BrainService: Initialized with OpenAIEmbeddingProvider');
       this.embeddingProvider = new OpenAIEmbeddingProvider(this.env.OPENAI_API_KEY);
     } else {
+      this.logger.log('BrainService: Initialized with DeterministicEmbeddingProvider');
       this.embeddingProvider = new DeterministicEmbeddingProvider();
     }
   }

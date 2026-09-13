@@ -143,6 +143,9 @@ export const MODEL_PRICING: Record<string, ModelPricing> = {
   // Google
   'google/gemini-2.5-flash':         { inputPer1M: 0.15, outputPer1M: 0.6   }, // Gemini 2.5 Flash
   'google/gemini-2.5-flash-preview': { inputPer1M: 0.15, outputPer1M: 0.6   }, // Preview alias
+  'google/gemini-3.6-flash':         { inputPer1M: 0.15, outputPer1M: 0.6   }, // Gemini 3.6 Flash
+  'google/gemini-3.8-flash':         { inputPer1M: 0.15, outputPer1M: 0.6   }, // Gemini 3.8 Flash
+  'google/gemini-2.5-pro':           { inputPer1M: 1.25, outputPer1M: 5.0   }, // Gemini 2.5 Pro
   'google/gemini-2.0-flash':         { inputPer1M: 0.1,  outputPer1M: 0.4   },
   'google/gemini-2.0-flash-lite':    { inputPer1M: 0.075, outputPer1M: 0.3  },
   'google/gemini-1.5-pro':           { inputPer1M: 3.5,  outputPer1M: 10.5  },

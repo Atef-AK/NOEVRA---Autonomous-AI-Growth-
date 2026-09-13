@@ -306,10 +306,10 @@ export default function CompanyBrainPage() {
             Embedding Dimensions
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white' }}>
-            1536 dims
+            3072 dims
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#6366f1', marginTop: '4px' }}>
-            OpenAI text-embedding-3-small
+          <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginTop: '4px' }}>
+            Google Gemini text-embedding-001
           </div>
         </div>
 

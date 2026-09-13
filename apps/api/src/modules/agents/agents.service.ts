@@ -11,6 +11,7 @@ import { getEnv } from '@growthos/config';
 import { createModelRouter, ModelRouter } from '@growthos/ai';
 import { createDefaultRegistry, ToolRegistry } from '@growthos/tools';
 import { AgentExecutor } from '@growthos/agent-runtime';
+import { ALL_SPECIALIZED_AGENTS } from '@growthos/agent-sdk';
 import type { CreateAgentDto, UpdateAgentDto, TriggerAgentRunDto } from './dto/agent.dto';
 
 @Injectable()
@@ -49,26 +50,59 @@ export class AgentsService {
   async list(organizationId: string, requestingUserId: string) {
     await this.verifyOrgMembership(organizationId, requestingUserId);
 
-    return this.prisma.agent.findMany({
+    const selectFields = {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      preferredModel: true,
+      allowedTools: true,
+      isActive: true,
+      maxSteps: true,
+      maxTokens: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: {
+        select: { runs: true },
+      },
+    };
+
+    const existing = await this.prisma.agent.findMany({
       where: { organizationId },
       orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        preferredModel: true,
-        allowedTools: true,
-        isActive: true,
-        maxSteps: true,
-        maxTokens: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: { runs: true },
-        },
-      },
+      select: selectFields,
     });
+
+    if (existing.length === 0) {
+      this.logger.log(`Auto-provisioning 13 canonical Gemini agents for organization ${organizationId}`);
+      for (const agentDef of ALL_SPECIALIZED_AGENTS) {
+        await this.prisma.agent.upsert({
+          where: { organizationId_slug: { organizationId, slug: agentDef.slug } },
+          update: {},
+          create: {
+            organizationId,
+            name: agentDef.name,
+            slug: agentDef.slug,
+            description: agentDef.description,
+            systemPrompt: agentDef.systemPrompt,
+            allowedTools: agentDef.allowedTools as any,
+            preferredModel: 'google/gemini-2.5-flash',
+            maxSteps: agentDef.maxSteps,
+            maxTokens: agentDef.maxTokens,
+            temperatureX10: agentDef.temperatureX10,
+            isActive: true,
+          },
+        });
+      }
+
+      return this.prisma.agent.findMany({
+        where: { organizationId },
+        orderBy: { createdAt: 'desc' },
+        select: selectFields,
+      });
+    }
+
+    return existing;
   }
 
   async findById(agentId: string, organizationId: string, requestingUserId: string) {
@@ -106,7 +140,7 @@ export class AgentsService {
         slug,
         description: dto.description ?? null,
         systemPrompt: dto.systemPrompt,
-        preferredModel: dto.preferredModel ?? 'openai/gpt-4o',
+        preferredModel: dto.preferredModel ?? 'google/gemini-2.5-flash',
         allowedTools: dto.allowedTools ?? ['web_search', 'fetch_url', 'calculator'],
         maxSteps: dto.maxSteps ?? 10,
         maxTokens: dto.maxTokens ?? 4096,
