@@ -69,19 +69,19 @@ function makeMockPrisma() {
         agents.push(newAgent);
         return newAgent;
       }),
-      update: vi.fn(async ({ where, data }) => {
+      update: vi.fn(async ({ where, data }: any) => {
         const idx = agents.findIndex((a) => a.id === where.id);
         if (idx >= 0) agents[idx] = { ...agents[idx], ...data };
         return agents[idx];
       }),
-      delete: vi.fn(async ({ where }) => {
+      delete: vi.fn(async ({ where }: any) => {
         const idx = agents.findIndex((a) => a.id === where.id);
         if (idx >= 0) agents.splice(idx, 1);
         return { id: where.id };
       }),
     },
     agentRun: {
-      create: vi.fn(async ({ data }) => {
+      create: vi.fn(async ({ data }: any) => {
         const newRun = {
           id: `run-${runs.length + 1}`,
           ...data,
@@ -92,17 +92,17 @@ function makeMockPrisma() {
         runs.push(newRun);
         return newRun;
       }),
-      findMany: vi.fn(async ({ where }) => {
+      findMany: vi.fn(async ({ where }: any) => {
         return runs.filter(
           (r) => r.agentId === where.agentId && r.organizationId === where.organizationId,
         );
       }),
-      findFirst: vi.fn(async ({ where }) => {
+      findFirst: vi.fn(async ({ where }: any) => {
         return runs.find(
           (r) => r.id === where.id && r.organizationId === where.organizationId,
         ) ?? null;
       }),
-      update: vi.fn(async ({ where, data }) => {
+      update: vi.fn(async ({ where, data }: any) => {
         const idx = runs.findIndex((r) => r.id === where.id);
         if (idx >= 0) runs[idx] = { ...runs[idx], ...data };
         return runs[idx];
