@@ -48,6 +48,29 @@ export class GoogleProvider implements AIProvider {
   }
 
   async complete(model: string, request: CompletionRequest): Promise<CompletionResponse> {
+    const maxRetries = 5;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+      try {
+        return await this._completeInternal(model, request);
+      } catch (err: any) {
+        if (err.status === 429 || (err.message && err.message.includes('429'))) {
+          attempt++;
+          if (attempt >= maxRetries) throw err;
+          // Exponential backoff with jitter
+          const waitTime = Math.pow(2, attempt) * 3000 + Math.random() * 2000;
+          console.warn(`[GoogleProvider] Rate limited (429). Retrying in ${Math.round(waitTime)}ms... (Attempt ${attempt}/${maxRetries})`);
+          await new Promise((res) => setTimeout(res, waitTime));
+        } else {
+          throw err;
+        }
+      }
+    }
+    throw new Error('Max retries exceeded');
+  }
+
+  private async _completeInternal(model: string, request: CompletionRequest): Promise<CompletionResponse> {
     const start = Date.now();
 
     // Extract system message
