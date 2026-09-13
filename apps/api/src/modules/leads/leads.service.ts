@@ -22,9 +22,12 @@ export class LeadsService {
 
   constructor(private readonly prisma: PrismaService) {
     this.modelRouter = createModelRouter({
-      OPENAI_API_KEY: this.env.OPENAI_API_KEY,
-      ANTHROPIC_API_KEY: this.env.ANTHROPIC_API_KEY,
       GOOGLE_AI_API_KEY: this.env.GOOGLE_AI_API_KEY,
+      OPENAI_API_KEY: this.env.OPENAI_API_KEY,
+      OPENAI_BASE_URL: this.env.OPENAI_BASE_URL,
+      OPENROUTER_API_KEY: this.env.OPENROUTER_API_KEY,
+      ANTHROPIC_API_KEY: this.env.ANTHROPIC_API_KEY,
+      AI_DEFAULT_PROVIDER: this.env.AI_DEFAULT_PROVIDER,
     });
   }
 

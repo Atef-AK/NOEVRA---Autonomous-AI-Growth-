@@ -10,17 +10,23 @@ import type { ModelRouterConfig, ProviderName } from './types';
 
 export interface AIEnvConfig {
   OPENAI_API_KEY?: string | undefined;
+  OPENAI_BASE_URL?: string | undefined;
+  OPENROUTER_API_KEY?: string | undefined;
   ANTHROPIC_API_KEY?: string | undefined;
   GOOGLE_AI_API_KEY?: string | undefined;
   /** Override default provider */
-  DEFAULT_AI_PROVIDER?: string | undefined;
+  AI_DEFAULT_PROVIDER?: string | undefined;
 }
 
 export function createModelRouter(env: AIEnvConfig): ModelRouter {
   const providers: ModelRouterConfig['providers'] = {};
 
   if (env.OPENAI_API_KEY) {
-    providers.openai = new OpenAIProvider(env.OPENAI_API_KEY);
+    providers.openai = new OpenAIProvider(env.OPENAI_API_KEY, env.OPENAI_BASE_URL);
+  }
+  if (env.OPENROUTER_API_KEY) {
+    // OpenRouter uses the exact same interface as OpenAI
+    providers.openrouter = new OpenAIProvider(env.OPENROUTER_API_KEY, 'https://openrouter.ai/api/v1');
   }
   if (env.ANTHROPIC_API_KEY) {
     providers.anthropic = new AnthropicProvider(env.ANTHROPIC_API_KEY);
@@ -31,7 +37,7 @@ export function createModelRouter(env: AIEnvConfig): ModelRouter {
 
   // Determine default: use configured env, then preference order (Gemini first)
   const preferenceOrder: ProviderName[] = ['google', 'openai', 'anthropic'];
-  const envDefault = env.DEFAULT_AI_PROVIDER as ProviderName | undefined;
+  const envDefault = env.AI_DEFAULT_PROVIDER as ProviderName | undefined;
 
   const defaultProvider: ProviderName =
     (envDefault && providers[envDefault] ? envDefault : null) ??

@@ -108,7 +108,7 @@ export interface AIProvider {
 // Model Router config
 // ============================================================
 
-export type ProviderName = 'openai' | 'anthropic' | 'google';
+export type ProviderName = 'openai' | 'anthropic' | 'google' | 'openrouter';
 
 export interface ModelRouterConfig {
   /** Default provider to use when no preference is specified */

@@ -72,6 +72,11 @@ export class ModelRouter {
    * Parse "provider/model" or "model" into { providerName, model }
    */
   private parseModel(providerModel: string): { providerName: ProviderName; model: string } {
+    // If the default provider is openrouter (or another aggregator), it expects the full string (e.g. google/gemini-2.5-flash)
+    if (this.defaultProvider === 'openrouter') {
+      return { providerName: 'openrouter', model: providerModel };
+    }
+
     const parts = providerModel.split('/');
     if (parts.length >= 2) {
       const providerName = parts[0] as ProviderName;

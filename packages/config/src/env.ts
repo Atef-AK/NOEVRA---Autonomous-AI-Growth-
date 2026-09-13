@@ -55,11 +55,13 @@ const envSchema = z.object({
 
   // AI Providers (optional individually, but at least one must be set in production)
   OPENAI_API_KEY: z.string().optional(),
+  OPENAI_BASE_URL: z.string().url().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),
   SERPAPI_API_KEY: z.string().optional(),
   BRAVE_SEARCH_API_KEY: z.string().optional(),
-  AI_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'local']).default('google'),
+  AI_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'local', 'openrouter']).default('google'),
   AI_DEFAULT_MODEL: z.string().default('gemini-2.0-flash'),
 
   // Email
