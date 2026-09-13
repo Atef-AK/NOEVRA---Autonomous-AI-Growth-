@@ -172,11 +172,14 @@ Return strictly valid JSON only:
       });
 
       const raw = completion.text ?? '{}';
-      const cleanJson = raw.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+      const jsonStart = raw.indexOf('{');
+      const jsonEnd = raw.lastIndexOf('}');
+      if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) throw new Error('No JSON object found');
+      const cleanJson = raw.substring(jsonStart, jsonEnd + 1);
       const parsed = JSON.parse(cleanJson);
       brandProfile = { ...brandProfile, ...parsed };
-    } catch (err) {
-      this.logger.warn('Gemini brand extraction failed, falling back to heuristics');
+    } catch (err: any) {
+      this.logger.warn(`Gemini brand extraction failed: ${err.message}`);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -338,11 +341,14 @@ Return strictly valid JSON only:
       });
 
       const raw = completion.text ?? '{}';
-      const clean = raw.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-      const parsed = JSON.parse(clean);
+      const jsonStart = raw.indexOf('{');
+      const jsonEnd = raw.lastIndexOf('}');
+      if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) throw new Error('No JSON object found');
+      const cleanJson = raw.substring(jsonStart, jsonEnd + 1);
+      const parsed = JSON.parse(cleanJson);
       blogPostData = { ...blogPostData, ...parsed };
-    } catch (err) {
-      this.logger.warn('Gemini blog post generation failed, using structured template');
+    } catch (err: any) {
+      this.logger.warn(`Gemini blog post generation failed: ${err.message}`);
     }
 
     const blogSlug = slugify(blogPostData.title, { lower: true, strict: true }).slice(0, 60);
@@ -416,10 +422,13 @@ Return valid JSON only:
         temperature: 0.5,
       });
       const raw = completion.text ?? '{}';
-      const clean = raw.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-      socialData = { ...socialData, ...JSON.parse(clean) };
-    } catch {
-      this.logger.warn('Social post generation failed, using defaults');
+      const jsonStart = raw.indexOf('{');
+      const jsonEnd = raw.lastIndexOf('}');
+      if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) throw new Error('No JSON object found');
+      const cleanJson = raw.substring(jsonStart, jsonEnd + 1);
+      socialData = { ...socialData, ...JSON.parse(cleanJson) };
+    } catch (err: any) {
+      this.logger.warn(`Social post generation failed: ${err.message}`);
     }
 
     const linkedInSlug = `linkedin-${slugify(blogPostData.title, { lower: true, strict: true }).slice(0, 40)}`;
@@ -505,10 +514,13 @@ Return valid JSON only:
         temperature: 0.5,
       });
       const raw = completion.text ?? '{}';
-      const clean = raw.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-      communityData = { ...communityData, ...JSON.parse(clean) };
-    } catch {
-      this.logger.warn('Community comment generation failed, using defaults');
+      const jsonStart = raw.indexOf('{');
+      const jsonEnd = raw.lastIndexOf('}');
+      if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) throw new Error('No JSON object found');
+      const cleanJson = raw.substring(jsonStart, jsonEnd + 1);
+      communityData = { ...communityData, ...JSON.parse(cleanJson) };
+    } catch (err: any) {
+      this.logger.warn(`Community comment generation failed: ${err.message}`);
     }
 
     // Save CommunityInteraction records
@@ -578,10 +590,13 @@ Return valid JSON only:
         temperature: 0.5,
       });
       const raw = completion.text ?? '{}';
-      const clean = raw.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-      videoData = { ...videoData, ...JSON.parse(clean) };
-    } catch {
-      this.logger.warn('Video script generation failed, using defaults');
+      const jsonStart = raw.indexOf('{');
+      const jsonEnd = raw.lastIndexOf('}');
+      if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) throw new Error('No JSON object found');
+      const cleanJson = raw.substring(jsonStart, jsonEnd + 1);
+      videoData = { ...videoData, ...JSON.parse(cleanJson) };
+    } catch (err: any) {
+      this.logger.warn(`Video script generation failed: ${err.message}`);
     }
 
     const videoSlug = `video-${slugify(videoData.title, { lower: true, strict: true }).slice(0, 40)}`;
